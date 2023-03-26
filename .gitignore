@@ -1,0 +1,5 @@
+.build
+.swiftpm
+XCFrameworkSource/HighwayHash.xcodeproj/project.xcworkspace/xcuserdata/*
+XCFrameworkSource/build
+

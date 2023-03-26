@@ -1,0 +1,20 @@
+//
+//  Config.xcconfig
+//  HighwayHash
+//
+//  Created by adamz on 2023-03-26.
+//  Copyright © 2023 GoodHatsLLC. All rights reserved.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+SWIFT_VERSION=5.8
+BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+CPPFLAGS=$(inherited) -I.
+CXXFLAGS=$(inherited) -std=c++11 -Wall -O3 -fPIC -pthread
+CXXFLAGS[arch=arm64]=$(CXXFLAGS) 
+CXXFLAGS[arch=x86_64]=$(CXXFLAGS) -mavx2 -msse4.1
+DFLAGS[arch=arm64] = $(inherited)
+
+EXCLUDED_SOURCE_FILE_NAMES[arch=arm64]=*/x86_64/*
+EXCLUDED_SOURCE_FILE_NAMES[arch=x86_64]=*/arm64/*

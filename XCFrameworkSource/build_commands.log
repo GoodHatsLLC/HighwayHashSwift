@@ -1,0 +1,30 @@
+xcodebuild archive \
+    -project HighwayHash.xcodeproj \
+    -scheme highwayhash \
+    -destination "generic/platform=iOS" \
+    -archivePath "archives/HighwayHash_iOS"
+
+xcodebuild archive \
+    -project HighwayHash.xcodeproj \
+    -scheme highwayhash \
+    -destination "generic/platform=iOS Simulator" \
+    -archivePath "archives/HighwayHash_iOS_Simulator"
+
+xcodebuild archive \
+    -project HighwayHash.xcodeproj \
+    -scheme highwayhash \
+    -destination "generic/platform=macOS" \
+    -archivePath "archives/HighwayHash_macOS"
+
+xcodebuild archive \
+    -project HighwayHash.xcodeproj \
+    -scheme highwayhash \
+    -destination "generic/platform=macOS,variant=Mac Catalyst" \
+    -archivePath "archives/HighwayHash_macOS_Catalyst"
+
+xcodebuild -create-xcframework \
+    -archive archives/HighwayHash_iOS.xcarchive -framework highwayhash.framework \
+    -archive archives/HighwayHash_iOS_Simulator.xcarchive -framework highwayhash.framework \
+    -archive archives/HighwayHash_macOS.xcarchive -framework highwayhash.framework \
+    -archive archives/HighwayHash_macOS_Catalyst.xcarchive -framework highwayhash.framework \
+    -output xcframeworks/HighwayHash.xcframework
