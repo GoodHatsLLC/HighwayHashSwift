@@ -1,11 +1,11 @@
-// swift-tools-version: 5.8
+// swift-tools-version: 5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 #if arch(x86_64)
 let EXCLUDE = "arm64/"
-let CXXSETTINGS: [CXXSetting] = [.unsafeFlags(["-mavx2", "-msse4.1"])]
+let CXXSETTINGS: [CXXSetting] = []
 #elseif arch(arm64)
 let EXCLUDE = "x86_64/"
 let CXXSETTINGS: [CXXSetting] = []

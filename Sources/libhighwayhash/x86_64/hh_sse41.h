@@ -40,9 +40,9 @@ namespace HH_TARGET_NAME {
 // Uses pairs of SSE4.1 instructions to emulate the AVX-2 algorithm.
 class HHStateSSE41 {
  public:
-  explicit HH_INLINE HHStateSSE41(const HHKey key) { Reset(key); }
+  explicit HH_INLINE __attribute__ ((__target__ ("sse3"))) HHStateSSE41(const HHKey key) { Reset(key); }
 
-  HH_INLINE void Reset(const HHKey key) {
+  HH_INLINE __attribute__ ((__target__ ("sse3"))) void Reset(const HHKey key) {
     // "Nothing up my sleeve numbers"; see HHStateTAVX2.
     const V2x64U init0L(0xa4093822299f31d0ull, 0xdbe6d5d5fe4cce2full);
     const V2x64U init0H(0x243f6a8885a308d3ull, 0x13198a2e03707344ull);
@@ -60,7 +60,7 @@ class HHStateSSE41 {
     mul1H = init1H;
   }
 
-  HH_INLINE void Update(const HHPacket& packet_bytes) {
+  HH_INLINE __attribute__ ((__target__ ("sse3"))) void Update(const HHPacket& packet_bytes) {
     const uint64_t* HH_RESTRICT packet =
         reinterpret_cast<const uint64_t * HH_RESTRICT>(packet_bytes);
     const V2x64U packetL = LoadUnaligned<V2x64U>(packet + 0);
@@ -68,7 +68,7 @@ class HHStateSSE41 {
     Update(packetH, packetL);
   }
 
-  HH_INLINE void UpdateRemainder(const char* bytes, const size_t size_mod32) {
+  HH_INLINE __attribute__ ((__target__ ("sse3"))) void UpdateRemainder(const char* bytes, const size_t size_mod32) {
     // 'Length padding' differentiates zero-valued inputs that have the same
     // size/32. mod32 is sufficient because each Update behaves as if a
     // counter were injected, because the state is large and mixed thoroughly.
@@ -107,7 +107,7 @@ class HHStateSSE41 {
     }
   }
 
-  HH_INLINE void Finalize(HHResult64* HH_RESTRICT result) {
+  HH_INLINE __attribute__ ((__target__ ("sse3"))) void Finalize(HHResult64* HH_RESTRICT result) {
     // Mix together all lanes.
     for (int n = 0; n < 4; n++) {
       PermuteAndUpdate();
@@ -119,7 +119,7 @@ class HHStateSSE41 {
     _mm_storel_epi64(reinterpret_cast<__m128i*>(result), hash);
   }
 
-  HH_INLINE void Finalize(HHResult128* HH_RESTRICT result) {
+  HH_INLINE __attribute__ ((__target__ ("sse3"))) void Finalize(HHResult128* HH_RESTRICT result) {
     for (int n = 0; n < 6; n++) {
       PermuteAndUpdate();
     }
@@ -130,7 +130,7 @@ class HHStateSSE41 {
     StoreUnaligned(hash, &(*result)[0]);
   }
 
-  HH_INLINE void Finalize(HHResult256* HH_RESTRICT result) {
+  HH_INLINE __attribute__ ((__target__ ("sse3"))) void Finalize(HHResult256* HH_RESTRICT result) {
     for (int n = 0; n < 10; n++) {
       PermuteAndUpdate();
     }
@@ -145,14 +145,14 @@ class HHStateSSE41 {
     StoreUnaligned(hashH, &(*result)[2]);
   }
 
-  static HH_INLINE void ZeroInitialize(char* HH_RESTRICT buffer_bytes) {
+  static HH_INLINE __attribute__ ((__target__ ("sse3"))) void ZeroInitialize(char* HH_RESTRICT buffer_bytes) {
     __m128i* buffer = reinterpret_cast<__m128i*>(buffer_bytes);
     const __m128i zero = _mm_setzero_si128();
     _mm_store_si128(buffer + 0, zero);
     _mm_store_si128(buffer + 1, zero);
   }
 
-  static HH_INLINE void CopyPartial(const char* HH_RESTRICT from,
+  static HH_INLINE __attribute__ ((__target__ ("sse3"))) void CopyPartial(const char* HH_RESTRICT from,
                                     const size_t size_mod32,
                                     char* HH_RESTRICT buffer) {
     for (size_t i = 0; i < size_mod32; ++i) {
@@ -160,7 +160,7 @@ class HHStateSSE41 {
     }
   }
 
-  static HH_INLINE void AppendPartial(const char* HH_RESTRICT from,
+  static HH_INLINE __attribute__ ((__target__ ("sse3"))) void AppendPartial(const char* HH_RESTRICT from,
                                       const size_t size_mod32,
                                       char* HH_RESTRICT buffer,
                                       const size_t buffer_valid) {
@@ -169,7 +169,7 @@ class HHStateSSE41 {
     }
   }
 
-  HH_INLINE void AppendAndUpdate(const char* HH_RESTRICT from,
+  HH_INLINE __attribute__ ((__target__ ("sse3"))) void AppendAndUpdate(const char* HH_RESTRICT from,
                                  const size_t size_mod32,
                                  const char* HH_RESTRICT buffer,
                                  const size_t buffer_valid) {
@@ -185,12 +185,12 @@ class HHStateSSE41 {
 
  private:
   // Swap 32-bit halves of each lane (caller swaps 128-bit halves)
-  static HH_INLINE V2x64U Rotate64By32(const V2x64U& v) {
+  static HH_INLINE __attribute__ ((__target__ ("sse3"))) V2x64U Rotate64By32(const V2x64U& v) {
     return V2x64U(_mm_shuffle_epi32(v, _MM_SHUFFLE(2, 3, 0, 1)));
   }
 
   // Rotates 32-bit lanes by "count" bits.
-  static HH_INLINE void Rotate32By(V2x64U* HH_RESTRICT vH,
+  static HH_INLINE __attribute__ ((__target__ ("sse3"))) void Rotate32By(V2x64U* HH_RESTRICT vH,
                                    V2x64U* HH_RESTRICT vL,
                                    const uint64_t count) {
     // WARNING: the shift count is 64 bits, so we can't reuse vsize_mod32,
@@ -205,7 +205,7 @@ class HHStateSSE41 {
     *vH = shifted_leftH | shifted_rightH;
   }
 
-  static HH_INLINE V2x64U ZipperMerge(const V2x64U& v) {
+  static HH_INLINE __attribute__ ((__target__ ("sse3"))) V2x64U ZipperMerge(const V2x64U& v) {
     // Multiplication mixes/scrambles bytes 0-7 of the 64-bit result to
     // varying degrees. In descending order of goodness, bytes
     // 3 4 2 5 1 6 0 7 have quality 228 224 164 160 100 96 36 32.
@@ -220,7 +220,7 @@ class HHStateSSE41 {
     return V2x64U(_mm_shuffle_epi8(v, V2x64U(hi, lo)));
   }
 
-  HH_INLINE void Update(const V2x64U& packetH, const V2x64U& packetL) {
+  HH_INLINE __attribute__ ((__target__ ("sse3"))) void Update(const V2x64U& packetH, const V2x64U& packetL) {
     v1L += packetL;
     v1H += packetH;
     v1L += mul0L;
@@ -237,7 +237,7 @@ class HHStateSSE41 {
     v1H += ZipperMerge(v0H);
   }
 
-  HH_INLINE void PermuteAndUpdate() {
+  HH_INLINE __attribute__ ((__target__ ("sse3"))) void PermuteAndUpdate() {
     // It is slightly better to permute v0 than v1; it will be added to v1.
     // AVX-2 Permute also swaps 128-bit halves, so swap input operands.
     Update(Rotate64By32(v0L), Rotate64By32(v0H));
@@ -245,7 +245,7 @@ class HHStateSSE41 {
 
   // Returns zero-initialized vector with the lower "size" = 0, 4, 8 or 12
   // bytes loaded from "bytes". Serves as a replacement for AVX2 maskload_epi32.
-  static HH_INLINE V2x64U LoadMultipleOfFour(const char* bytes,
+  static HH_INLINE __attribute__ ((__target__ ("sse3"))) V2x64U LoadMultipleOfFour(const char* bytes,
                                              const size_t size) {
     const uint32_t* words = reinterpret_cast<const uint32_t*>(bytes);
     // Mask of 1-bits where the final 4 bytes should be inserted (replacement
@@ -273,7 +273,7 @@ class HHStateSSE41 {
   // Bit shifts are only possible on independent 64-bit lanes. We therefore
   // insert the upper bits of x[0] that were lost into x[1].
   // Thanks to D. Lemire for helpful comments!
-  static HH_INLINE void XorByShift128Left12(const V2x64U& x,
+  static HH_INLINE __attribute__ ((__target__ ("sse3"))) void XorByShift128Left12(const V2x64U& x,
                                             V2x64U* HH_RESTRICT out) {
     const V2x64U zero(_mm_setzero_si128());
     const V2x64U sign_bit128(_mm_insert_epi32(zero, 0x80000000u, 3));
@@ -302,7 +302,7 @@ class HHStateSSE41 {
 
   // Modular reduction by the irreducible polynomial (x^128 + x^2 + x).
   // Input: a 256-bit number a3210.
-  static HH_INLINE V2x64U ModularReduction(const V2x64U& a32_unmasked,
+  static HH_INLINE __attribute__ ((__target__ ("sse3"))) V2x64U ModularReduction(const V2x64U& a32_unmasked,
                                            const V2x64U& a10) {
     // See Lemire, https://arxiv.org/pdf/1503.03465v8.pdf.
     V2x64U out = a10;

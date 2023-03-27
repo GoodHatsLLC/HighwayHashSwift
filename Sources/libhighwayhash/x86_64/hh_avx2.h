@@ -39,9 +39,9 @@ namespace HH_TARGET_NAME {
 
 class HHStateAVX2 {
  public:
-  explicit HH_INLINE HHStateAVX2(const HHKey key_lanes) { Reset(key_lanes); }
+  explicit HH_INLINE __attribute__((target("avx2")))  HHStateAVX2(const HHKey key_lanes) { Reset(key_lanes); }
 
-  HH_INLINE void Reset(const HHKey key_lanes) {
+  HH_INLINE __attribute__((target("avx2")))  void Reset(const HHKey key_lanes) {
     // "Nothing up my sleeve" numbers, concatenated hex digits of Pi from
     // http://www.numberworld.org/digits/Pi/, retrieved Feb 22, 2016.
     //
@@ -67,13 +67,13 @@ def x(a,b,c):
     mul1 = init1;
   }
 
-  HH_INLINE void Update(const HHPacket& packet_bytes) {
+  HH_INLINE __attribute__((target("avx2")))  void Update(const HHPacket& packet_bytes) {
     const uint64_t* HH_RESTRICT packet =
         reinterpret_cast<const uint64_t * HH_RESTRICT>(packet_bytes);
     Update(LoadUnaligned<V4x64U>(packet));
   }
 
-  HH_INLINE void UpdateRemainder(const char* bytes, const size_t size_mod32) {
+  HH_INLINE __attribute__((target("avx2")))  void UpdateRemainder(const char* bytes, const size_t size_mod32) {
     // 'Length padding' differentiates zero-valued inputs that have the same
     // size/32. mod32 is sufficient because each Update behaves as if a
     // counter were injected, because the state is large and mixed thoroughly.
@@ -115,7 +115,7 @@ def x(a,b,c):
     }
   }
 
-  HH_INLINE void Finalize(HHResult64* HH_RESTRICT result) {
+  HH_INLINE __attribute__((target("avx2")))  void Finalize(HHResult64* HH_RESTRICT result) {
     // Mix together all lanes. It is slightly better to permute v0 than v1;
     // it will be added to v1.
     Update(Permute(v0));
@@ -130,7 +130,7 @@ def x(a,b,c):
     _mm_storel_epi64(reinterpret_cast<__m128i*>(result), hash);
   }
 
-  HH_INLINE void Finalize(HHResult128* HH_RESTRICT result) {
+  HH_INLINE __attribute__((target("avx2")))  void Finalize(HHResult128* HH_RESTRICT result) {
     for (int n = 0; n < 6; n++) {
       Update(Permute(v0));
     }
@@ -141,7 +141,7 @@ def x(a,b,c):
     _mm_storeu_si128(reinterpret_cast<__m128i*>(result), hash);
   }
 
-  HH_INLINE void Finalize(HHResult256* HH_RESTRICT result) {
+  HH_INLINE __attribute__((target("avx2")))  void Finalize(HHResult256* HH_RESTRICT result) {
     for (int n = 0; n < 10; n++) {
       Update(Permute(v0));
     }
@@ -153,13 +153,13 @@ def x(a,b,c):
   }
 
   // "buffer" must be 32-byte aligned.
-  static HH_INLINE void ZeroInitialize(char* HH_RESTRICT buffer) {
+  static HH_INLINE __attribute__((target("avx2")))  void ZeroInitialize(char* HH_RESTRICT buffer) {
     const __m256i zero = _mm256_setzero_si256();
     _mm256_store_si256(reinterpret_cast<__m256i*>(buffer), zero);
   }
 
   // "buffer" must be 32-byte aligned.
-  static HH_INLINE void CopyPartial(const char* HH_RESTRICT from,
+  static HH_INLINE __attribute__((target("avx2")))  void CopyPartial(const char* HH_RESTRICT from,
                                     const size_t size_mod32,
                                     char* HH_RESTRICT buffer) {
     const V4x32U size(size_mod32);
@@ -181,7 +181,7 @@ def x(a,b,c):
   }
 
   // "buffer" must be 32-byte aligned.
-  static HH_INLINE void AppendPartial(const char* HH_RESTRICT from,
+  static HH_INLINE __attribute__((target("avx2")))  void AppendPartial(const char* HH_RESTRICT from,
                                       const size_t size_mod32,
                                       char* HH_RESTRICT buffer,
                                       const size_t buffer_valid) {
@@ -210,7 +210,7 @@ def x(a,b,c):
   }
 
   // "buffer" must be 32-byte aligned.
-  HH_INLINE void AppendAndUpdate(const char* HH_RESTRICT from,
+  HH_INLINE __attribute__((target("avx2")))  void AppendAndUpdate(const char* HH_RESTRICT from,
                                  const size_t size_mod32,
                                  const char* HH_RESTRICT buffer,
                                  const size_t buffer_valid) {
@@ -241,7 +241,7 @@ def x(a,b,c):
   }
 
  private:
-  static HH_INLINE V4x32U MaskedLoadInt(const char* from,
+  static HH_INLINE __attribute__((target("avx2")))  V4x32U MaskedLoadInt(const char* from,
                                         const V4x32U& int_mask) {
     // No faults will be raised when reading n=0..3 ints from "from" provided
     // int_mask[n] = 0.
@@ -252,7 +252,7 @@ def x(a,b,c):
   // Loads <= 16 bytes without accessing any byte outside [from, from + size).
   // from[i] is loaded into lane i; from[i >= size] is undefined.
   template <uint32_t kSizeOffset = 0, class Load3Policy = Load3::AllowNone>
-  static HH_INLINE V4x32U Load0To16(const char* from, const size_t size_mod32,
+  static HH_INLINE __attribute__((target("avx2")))  V4x32U Load0To16(const char* from, const size_t size_mod32,
                                     const V4x32U& size) {
     const char* remainder = from + (size_mod32 & ~3);
     const uint64_t last3 = Load3()(Load3Policy(), remainder, size_mod32 & 3);
@@ -261,12 +261,12 @@ def x(a,b,c):
     return Insert4AboveMask(last3, int_mask, int_lanes);
   }
 
-  static HH_INLINE V4x64U Rotate64By32(const V4x64U& v) {
+  static HH_INLINE __attribute__((target("avx2")))  V4x64U Rotate64By32(const V4x64U& v) {
     return V4x64U(_mm256_shuffle_epi32(v, _MM_SHUFFLE(2, 3, 0, 1)));
   }
 
   // Rotates 32-bit lanes by "count" bits.
-  static HH_INLINE V4x64U Rotate32By(const V4x64U& v, const V8x32U& count) {
+  static HH_INLINE __attribute__((target("avx2")))  V4x64U Rotate32By(const V4x64U& v, const V8x32U& count) {
     // Use variable shifts because sll_epi32 has 4 cycle latency (presumably
     // to broadcast the shift count).
     const V4x64U shifted_left(_mm256_sllv_epi32(v, count));
@@ -274,7 +274,7 @@ def x(a,b,c):
     return shifted_left | shifted_right;
   }
 
-  static HH_INLINE V4x64U Permute(const V4x64U& v) {
+  static HH_INLINE __attribute__((target("avx2")))  V4x64U Permute(const V4x64U& v) {
     // For complete mixing, we need to swap the upper and lower 128-bit halves;
     // we also swap all 32-bit halves. This is faster than extracti128 plus
     // inserti128 followed by Rotate64By32.
@@ -283,11 +283,11 @@ def x(a,b,c):
     return V4x64U(_mm256_permutevar8x32_epi32(v, indices));
   }
 
-  static HH_INLINE V4x64U MulLow32(const V4x64U& a, const V4x64U& b) {
+  static HH_INLINE __attribute__((target("avx2")))  V4x64U MulLow32(const V4x64U& a, const V4x64U& b) {
     return V4x64U(_mm256_mul_epu32(a, b));
   }
 
-  static HH_INLINE V4x64U ZipperMerge(const V4x64U& v) {
+  static HH_INLINE __attribute__((target("avx2")))  V4x64U ZipperMerge(const V4x64U& v) {
     // Multiplication mixes/scrambles bytes 0-7 of the 64-bit result to
     // varying degrees. In descending order of goodness, bytes
     // 3 4 2 5 1 6 0 7 have quality 228 224 164 160 100 96 36 32.
@@ -304,7 +304,7 @@ def x(a,b,c):
   }
 
   // Updates four hash lanes in parallel by injecting four 64-bit packets.
-  HH_INLINE void Update(const V4x64U& packet) {
+  HH_INLINE __attribute__((target("avx2")))  void Update(const V4x64U& packet) {
     v1 += packet;
     v1 += mul0;
     mul0 ^= MulLow32(v1, v0 >> 32);
@@ -316,7 +316,7 @@ def x(a,b,c):
     v1 += ZipperMerge(v0);
   }
 
-  HH_INLINE void Update(const V4x32U& packetH, const V4x32U& packetL) {
+  HH_INLINE __attribute__((target("avx2")))  void Update(const V4x32U& packetH, const V4x32U& packetL) {
     const __m256i packetL256 = _mm256_castsi128_si256(packetL);
     Update(V4x64U(_mm256_inserti128_si256(packetL256, packetH, 1)));
   }
@@ -325,7 +325,7 @@ def x(a,b,c):
   // Also does the same for the upper 128 bit lane "b". Bit shifts are only
   // possible on independent 64-bit lanes. We therefore insert the upper bits
   // of a[0] that were lost into a[1]. Thanks to D. Lemire for helpful comments!
-  static HH_INLINE void XorByShift128Left12(const V4x64U& ba,
+  static HH_INLINE __attribute__((target("avx2")))  void XorByShift128Left12(const V4x64U& ba,
                                             V4x64U* HH_RESTRICT out) {
     const V4x64U zero = ba ^ ba;
     const V4x64U top_bits2 = ba >> (64 - 2);
@@ -360,7 +360,7 @@ def x(a,b,c):
   // Modular reduction by the irreducible polynomial (x^128 + x^2 + x).
   // Input: two 256-bit numbers a3210 and b3210, interleaved in 2 vectors.
   // The upper and lower 128-bit halves are processed independently.
-  static HH_INLINE V4x64U ModularReduction(const V4x64U& b32a32,
+  static HH_INLINE __attribute__((target("avx2")))  V4x64U ModularReduction(const V4x64U& b32a32,
                                            const V4x64U& b10a10) {
     // See Lemire, https://arxiv.org/pdf/1503.03465v8.pdf.
     V4x64U out = b10a10;
