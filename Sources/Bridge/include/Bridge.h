@@ -2,6 +2,6 @@
 #define Bridge_h
 
 #include <stdio.h>
-#include "highwayhash/header.h"
+#import <libhighwayhash.h>
 
 #endif /* Bridge_h */

@@ -20,5 +20,4 @@ public enum SipHash {
   public static func of(_ string: String) -> UInt64 {
     of(data: Data(string.utf8.map { $0 }))
   }
-
 }

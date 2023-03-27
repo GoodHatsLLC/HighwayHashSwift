@@ -6,6 +6,8 @@ This package is a Swift package manager wrapper around [HighwayHash](https://git
 The reference implementation of `HighwayHash` is written in C++. This package bundles that implementation
 in an `XCFramework` and provides a simple API.
 
+(Note: `v0.1.0` uses an XCFramework. The current main attempts to build directly.)
+
 The algorithm is stable and, unlike Swift's native Hashable behavior, this package provides an API with a stable
 seed value. i.e. you can serialize the output and rely on it to be constant between sessions.
 
