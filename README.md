@@ -1,21 +1,17 @@
-# HighwayHash
+# HighwayHashSwift
 
-This package is a Swift package manager wrapper around [HighwayHash](https://github.com/google/highwayhash).
+This package is a Swift package manager wrapper for [HighwayHash](https://github.com/google/highwayhash) — a fast, stable, and dos-attack resistent hashing algorithm.
 
-`HighwayHash` is a hashing algorithm which is faster than `SipHash` (which backs Swift's Hashable implementation.)  
-The reference implementation of `HighwayHash` is written in C++. This package bundles that implementation
-in an `XCFramework` and provides a simple API.
-
-(Note: `v0.1.0` uses an XCFramework. The current main attempts to build directly.)
-
-The algorithm is stable and, unlike Swift's native Hashable behavior, this package provides an API with a stable
-seed value. i.e. you can serialize the output and rely on it to be constant between sessions.
-
-The wrapped library also contains an implementation of SipHash. That's exposed here too.
+* `HighwayHash` is faster than `SipHash` (which backs Swift's Hashable implementation.)
+* `HighwayHash` is stable for a given seed value. Unlike Swift's `Hashable` you can serialize `HighwayHash` output to match values _across sessions_.
+* This package bundles the c++ implementation of `HighwayHash` and provides an API for easy use from Swift.
+* This package is usable on `arm64` and `x86_64` variants of macOS, iOS, and linux.
+* The bundled code, and this package, are apache 2 licensed.
+* The underlying library contains an implementation of SipHash. That's exposed here too.
 
 ## Usage
 
-Both hashers accept `Data` input, and have a convenience wrapper for strings. 
+`HighwayHash` (and `SipHash`) accept `Data` or `String` input and return a `UInt64` hash.
 
 ```swift
     import HighwayHash
@@ -23,9 +19,3 @@ Both hashers accept `Data` input, and have a convenience wrapper for strings.
     let output = HighwayHash.of(input)
     XCTAssertEqual(output, UInt64(10_502_827_635_072_092_050))
 ```
-
-## Platforms
-
-The XCFramework contained in this package is built to support iOS, iOS Simulators, and macOS, and macOS Catalyst 
-in architecture builds for `arm64` and `x86_64`.
-(The project used to generate it is checked in.)
