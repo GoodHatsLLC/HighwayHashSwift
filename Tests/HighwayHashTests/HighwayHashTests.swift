@@ -1,6 +1,8 @@
 import XCTest
 @testable import HighwayHash
 
+// MARK: - HighwayHashTests
+
 final class HighwayHashTests: XCTestCase {
 
   func testDefaultSeed() throws {
@@ -17,7 +19,7 @@ final class HighwayHashTests: XCTestCase {
     let input = "some input".data
     let hasher = HighwayHash(seed: .init(a: 1, b: 1, c: 1, d: 1))
     let value = hasher.hash(data: input)
-    XCTAssertEqual(value, 7690291565961054682)
+    XCTAssertEqual(value, 7_690_291_565_961_054_682)
   }
 
   func testInstanceHash_isStableAcrossHashers() throws {
@@ -40,11 +42,12 @@ final class HighwayHashTests: XCTestCase {
 
 extension String {
   var data: Data {
-    Data(self.utf8.map { $0 })
+    Data(utf8.map { $0 })
   }
 }
+
 extension UInt64 {
   static var rand: Self {
-    UInt64.random(in: UInt64.min...UInt64.max)
+    UInt64.random(in: UInt64.min ... UInt64.max)
   }
 }
