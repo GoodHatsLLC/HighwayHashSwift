@@ -46,8 +46,8 @@
 --rules redundantVoidReturnType
 --rules semicolons
 --rules sortDeclarations
---rules sortedImports
---rules sortedSwitchCases
+--rules sortImports
+--rules sortSwitchCases
 --rules spaceAroundBraces
 --rules spaceAroundComments
 --rules spaceAroundGenerics

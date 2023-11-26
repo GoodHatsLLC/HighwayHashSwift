@@ -1,23 +1,24 @@
 import Bridge
 import Foundation
 
-public enum SipHash {
-  private static let key: [UInt64] = [1, 0, 6, 6]
-  private static let keyCount: UInt64 = .init(key.count)
-  private static let keyData: UnsafePointer<[UInt64]> = {
-    let pointer = UnsafeMutablePointer<[UInt64]>.allocate(capacity: key.count)
-    pointer.initialize(to: key)
-    return .init(pointer)
-  }()
+public struct SipHash {
 
-  public static func of(data: Data) -> UInt64 {
+  public static let `default`: Self = .init(seed: .default)
+  public init(seed: Seed) {
+    self.seed = seed
+  }
+
+  private let seed: Seed
+
+  public func of(data: Data) -> UInt64 {
     let bytes = data.map { CChar($0) }
     return bytes.withUnsafeBufferPointer { pointer in
-      SipHashC(keyData[0], pointer.baseAddress, keyCount)
+      let raw = seed.raw()
+      return SipHashC(raw.pointer[0], pointer.baseAddress, raw.count)
     }
   }
 
-  public static func of(_ string: String) -> UInt64 {
+  public func of(_ string: String) -> UInt64 {
     of(data: Data(string.utf8.map { $0 }))
   }
 }
